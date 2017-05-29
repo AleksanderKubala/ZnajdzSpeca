@@ -21,14 +21,4 @@ public interface SpecializationRepository extends CrudRepository<Specialization,
     List<Specialization> findAllByTag(Tag tag);
 
     List<Specialization> findAllByTagIn(List<Tag> tag);
-
-    /*
-    List<Tag> findAllTagByJob(Job job);
-
-    List<Tag> findAllTagByCompany(Company company);
-
-    List<Job> findAllJobByTagIn(List<Tag> tag);
-
-    List<Company> findAllCompanyByTagIn(List<Tag> tag);
-    */
 }
