@@ -349,8 +349,8 @@ public class JobController {
         if(job.getCompany() != null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(!validateDate(job))
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        //if(!validateDate(job))
+          //  return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         Company company = companyRepository.findByEmail(
                 SecurityContextHolder.getContext().getAuthentication().getName());
