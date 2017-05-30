@@ -24,6 +24,8 @@ public class Submission {
                 referencedColumnName = "ID")
     private Job job;
 
+    private Boolean accepted;
+
     public Submission() {
     }
 
@@ -31,6 +33,13 @@ public class Submission {
         this.company = company;
         this.job = job;
     }
+
+    public Submission(Company company, Job job, Boolean accepted) {
+        this(company, job);
+        this.accepted = accepted;
+    }
+
+
 
     public Company getCompany() {
         return company;
@@ -46,6 +55,14 @@ public class Submission {
 
     public void setJob(Job job) {
         this.job = job;
+    }
+
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
     }
 
     @Override

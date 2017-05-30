@@ -328,7 +328,8 @@ public class JobController {
         List<CompanyResponse> response = new ArrayList<>();
 
         for(Submission submission : submissions) {
-            response.add(new CompanyResponse(submission.getCompany()));
+            if(submission.getAccepted())
+                response.add(new CompanyResponse(submission.getCompany()));
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -358,9 +359,16 @@ public class JobController {
         if(company == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        submissionRepository.save(new Submission(company , job));
+        Submission sub = submissionRepository.findByJobAndCompany(job, company);
 
-        return new ResponseEntity<JobResponse>(new JobResponse(job,returnTagListBySpecializations(job)),
+        if(sub == null)
+            sub = new Submission(company, job, true);
+        else
+            sub.setAccepted(true);
+
+        submissionRepository.save(sub);
+
+        return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job)),
                 HttpStatus.OK);
 
     }
@@ -387,7 +395,7 @@ public class JobController {
         opinionRepository.save(new Opinion(opinionRequest));
 
         // TODO: referencja do firmy
-        return new ResponseEntity<JobResponse>(new JobResponse(job,returnTagListBySpecializations(job))
+        return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
                 ,HttpStatus.OK);
     }
 
@@ -415,7 +423,7 @@ public class JobController {
 
         jobRepository.save(job);
 
-        return new ResponseEntity<JobResponse>(new JobResponse(job,returnTagListBySpecializations(job))
+        return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
                 ,HttpStatus.OK);
     }
 

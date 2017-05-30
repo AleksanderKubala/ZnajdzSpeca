@@ -16,4 +16,6 @@ public interface SubmissionRepository extends CrudRepository<Submission, Integer
     List<Submission> findAllByJob(Job job);
 
     List<Submission> findAllByJobIn(List<Job> job);
+
+    Submission findByJobAndCompany(Job job, Company company);
 }
