@@ -8,6 +8,8 @@ import com.example.model.Opinion.OpinionRepository;
 import com.example.model.Opinion.OpinionResponse;
 import com.example.model.Specialization.Specialization;
 import com.example.model.Specialization.SpecializationRepository;
+import com.example.model.Submission.Submission;
+import com.example.model.Submission.SubmissionRepository;
 import com.example.model.Tag.Tag;
 import com.example.model.Tag.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,7 @@ public class CompanyController {
     @Autowired
     private OpinionRepository opinionRepository;
     @Autowired
-    private TagRepository tagRepository;
+    private SubmissionRepository submissionRepository;
     @Autowired
     private SpecializationRepository specializationRepository;
 	
@@ -116,6 +118,50 @@ public class CompanyController {
         List<JobResponse> jobResponses = convertJobToJobResponse(jobs);
 
         return new ResponseEntity<>(findOpinionResponseByJobs(jobs), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/company/offers")
+    public ResponseEntity<List<JobResponse>> getOfferedJobs() {
+
+        Company company = companyRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if(company == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        List<Submission> offers = submissionRepository.findAllByCompanyAndAcceptedIsNull(company);
+        List<JobResponse> response = new ArrayList<>();
+
+        for(Submission sub : offers) {
+
+            List<Specialization> specs = specializationRepository.findAllByJob(sub.getJob());
+            List<Tag> tags = getJobTags(sub.getJob());
+
+            response.add(new JobResponse(sub.getJob(), tags));
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/company/accepted")
+    public ResponseEntity<List<JobResponse>> getAcceptedJobs() {
+
+        Company company = companyRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if(company == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        List<Submission> offers = submissionRepository.findAllByCompanyAndAcceptedIsTrue(company);
+        List<JobResponse> response = new ArrayList<>();
+
+        for(Submission sub : offers) {
+
+            List<Specialization> specs = specializationRepository.findAllByJob(sub.getJob());
+            List<Tag> tags = getJobTags(sub.getJob());
+
+            response.add(new JobResponse(sub.getJob(), tags));
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private List<JobResponse> convertJobToJobResponse(List<Job> jobs) {

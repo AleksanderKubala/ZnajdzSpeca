@@ -290,13 +290,12 @@ public class JobController {
         if(job == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        /*
-        Client client = clientRepository.findById(id);
 
-        if(job.getClient().getId() != client.getId()) {
-            return new ResponseEntity<JobResponse>(HttpStatus.FORBIDDEN);
+        Client client = clientRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if(!job.getClient().getName().equals(client.getName())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        */
 
         if(job.getCompany() != null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -328,8 +327,9 @@ public class JobController {
         List<CompanyResponse> response = new ArrayList<>();
 
         for(Submission submission : submissions) {
-            if(submission.getAccepted())
-                response.add(new CompanyResponse(submission.getCompany()));
+            if(submission.getAccepted() != null)
+                if(submission.getAccepted())
+                    response.add(new CompanyResponse(submission.getCompany()));
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -359,15 +359,6 @@ public class JobController {
         if(company == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        List<Submission> submissionsListByCompany = submissionRepository.findAllByCompany(company);
-                for(int i=0; i<submissionsListByCompany.size(); i++) {
-                        System.err.println(submissionsListByCompany.get(i).getJob().toString());
-                        if(submissionsListByCompany.get(i).getJob().equals(job)) {
-                              return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-                        }
-                }
-
         Submission sub = submissionRepository.findByJobAndCompany(job, company);
 
         if(sub == null)
@@ -380,6 +371,65 @@ public class JobController {
         return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job)),
                 HttpStatus.OK);
 
+    }
+
+    @PutMapping(value = "/job/{id}/company/{companyId}")
+    public ResponseEntity<?> chooseCompanyForJob(@PathVariable Integer id, @PathVariable Integer companyId) {
+
+        Job job = jobRepository.findOne(id);
+
+        if(job == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        Client client = clientRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if(client == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if(!job.getClient().getEmail().equals(client.getEmail()))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        Company company = companyRepository.findOne(companyId);
+
+        if(company == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        Submission offer = submissionRepository.findByJobAndCompany(job, company);
+
+        if(offer != null)
+            return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+
+        submissionRepository.save(new Submission(company, job, null));
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping(value= "/job/{id}/reject")
+    public ResponseEntity<?> rejectOffer(@PathVariable Integer id) {
+
+        Job job = jobRepository.findOne(id);
+
+        if(job == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        Company company = companyRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        if(company == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        Submission offer = submissionRepository.findByJobAndCompany(job, company);
+
+        if(offer == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        if(offer.getAccepted() != null)
+            if(offer.getAccepted())
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        offer.setAccepted(false);
+        submissionRepository.save(offer);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/job/{id}/opinion")
@@ -431,6 +481,9 @@ public class JobController {
         job.setVisible(false);
 
         jobRepository.save(job);
+
+        List<Submission> subs = submissionRepository.findAllByJob(job);
+        submissionRepository.delete(subs);
 
         return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
                 ,HttpStatus.OK);

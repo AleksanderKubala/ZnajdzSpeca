@@ -18,4 +18,10 @@ public interface SubmissionRepository extends CrudRepository<Submission, Integer
     List<Submission> findAllByJobIn(List<Job> job);
 
     Submission findByJobAndCompany(Job job, Company company);
+
+    List<Submission> findAllByCompanyAndAcceptedIsNull(Company company);
+
+    List<Submission> findAllByCompanyAndAcceptedIsTrue(Company company);
+
+    List<Submission> findAllByCompanyAndAcceptedIsFalse(Company company);
 }
