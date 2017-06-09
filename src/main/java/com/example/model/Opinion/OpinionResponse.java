@@ -1,6 +1,7 @@
 package com.example.model.Opinion;
 
 import com.example.model.Job.Job;
+import com.example.model.Job.JobResponse;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,24 +14,24 @@ import java.util.Date;
 public class OpinionResponse {
     private int id;
     private Date date;
-    private Job job;
+    private JobResponse jobResponse;
     private String text;
     private int rate;
 
     public OpinionResponse(){}
 
-    public OpinionResponse(Opinion opinion){
+    public OpinionResponse(Opinion opinion, JobResponse jobResponse){
         this.id = opinion.getId();
         this.date = opinion.getDate();
-        this.job = opinion.getJob();
+        this.jobResponse = jobResponse;
         this.text = opinion.getText();
         this.rate = opinion.getRate();
     }
 
-    public OpinionResponse(int id, Date date, Job job, String text, int rate){
+    public OpinionResponse(int id, Date date, JobResponse jobResponse, String text, int rate){
         this.id = id;
         this.date = date;
-        this.job = job;
+        this.jobResponse = jobResponse;
         this.text = text;
         this.rate = rate;
     }

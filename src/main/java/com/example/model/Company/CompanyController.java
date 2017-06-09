@@ -49,14 +49,14 @@ public class CompanyController {
 	       company.setNumberJobs(random.nextInt(25));
 	       company.setNumberOpinions(random.nextInt(25));
            companyRepository.save(company);
-        return new ResponseEntity<CompanyResponse>(new CompanyResponse(company), HttpStatus.OK);
+        return new ResponseEntity<>(new CompanyResponse(company), HttpStatus.OK);
     }
 
     @GetMapping("/company/{id}")
     public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Integer id){
         Company company = companyRepository.findOne(id);
         if(company!=null)
-            return new ResponseEntity<CompanyResponse>(new CompanyResponse(company), HttpStatus.OK);
+            return new ResponseEntity<>(new CompanyResponse(company), HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -71,7 +71,7 @@ public class CompanyController {
         if(company == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(SecurityContextHolder.getContext().getAuthentication().getName() != company.getEmail())
+        if(!SecurityContextHolder.getContext().getAuthentication().getName().equals(company.getEmail()))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         Company companyCheck = companyRepository.findByEmail(newCompany.getEmail());
@@ -84,7 +84,7 @@ public class CompanyController {
 
         newCompany.setId(id);
         companyRepository.save(newCompany);
-        return new ResponseEntity<CompanyResponse>(new CompanyResponse(newCompany), HttpStatus.OK);
+        return new ResponseEntity<>(new CompanyResponse(newCompany), HttpStatus.OK);
 
     }
 
@@ -99,7 +99,7 @@ public class CompanyController {
         if(jobs.size() == 0)
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-        return new ResponseEntity<List<JobResponse>>(convertJobToJobResponse(jobs),HttpStatus.OK);
+        return new ResponseEntity<>(convertJobToJobResponse(jobs),HttpStatus.OK);
     }
 
     @GetMapping("company/{id}/opinions")
@@ -115,7 +115,7 @@ public class CompanyController {
 
         List<JobResponse> jobResponses = convertJobToJobResponse(jobs);
 
-        return new ResponseEntity<List<OpinionResponse>>(findOpinionResponseByJobs(jobs), HttpStatus.OK);
+        return new ResponseEntity<>(findOpinionResponseByJobs(jobs), HttpStatus.OK);
     }
 
     private List<JobResponse> convertJobToJobResponse(List<Job> jobs) {
@@ -150,15 +150,19 @@ public class CompanyController {
     }
 
     private List<OpinionResponse> findOpinionResponseByJobs(List<Job> jobs){
-        List <Opinion> opinions = new ArrayList<Opinion>();
+        List <Opinion> opinions = new ArrayList<>();
+        List <JobResponse> jobResponses = new ArrayList<>();
 
-        for(Job job : jobs)
+        for(Job job : jobs) {
             opinions.add(opinionRepository.findByJob(job));
+            jobResponses.add(new JobResponse(job ,getJobTags(job)));
+        }
 
-        List<OpinionResponse> opinionResponses = new ArrayList<OpinionResponse>();
+        List<OpinionResponse> opinionResponses = new ArrayList<>();
 
-        for(Opinion opinion : opinions)
-            opinionResponses.add(new OpinionResponse(opinion));
+        for(int i = 0; i < opinions.size(); i++) {
+            opinionResponses.add(new OpinionResponse(opinions.get(i), jobResponses.get(i)));
+        }
 
         return opinionResponses;
     }

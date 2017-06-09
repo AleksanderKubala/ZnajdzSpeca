@@ -58,9 +58,12 @@ public class AuthenticationRestController {
         }
 
 
-        //if(jwtUserDetailsService.loadUserByUsername(jwtAuthenticationRequest.getEmail()).getClient() != null)
         JwtUser user =  jwtUserDetailsService.loadUserByUsername(jwtAuthenticationRequest.getEmail());
         String token = jwtTokenUtil.generateToken(user);
+
+        MyLogger.log.info("SPRAWDZENIE POPRAWNOSCI WPROWADZONEGO HASLA");
+        if(!user.getPassword().equals(jwtAuthenticationRequest.getPassword()))
+            return new ResponseEntity<JwtAuthenticationResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         MyLogger.log.info("sprawdzenie tokena " + jwtTokenUtil.getEmailFromToken(token));
 

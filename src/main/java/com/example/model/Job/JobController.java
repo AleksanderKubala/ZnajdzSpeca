@@ -359,6 +359,15 @@ public class JobController {
         if(company == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
+        List<Submission> submissionsListByCompany = submissionRepository.findAllByCompany(company);
+                for(int i=0; i<submissionsListByCompany.size(); i++) {
+                        System.err.println(submissionsListByCompany.get(i).getJob().toString());
+                        if(submissionsListByCompany.get(i).getJob().equals(job)) {
+                              return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+                        }
+                }
+
         Submission sub = submissionRepository.findByJobAndCompany(job, company);
 
         if(sub == null)
@@ -392,7 +401,7 @@ public class JobController {
         if(opinionRepository.findByJob(job) != null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        opinionRepository.save(new Opinion(opinionRequest));
+        opinionRepository.save(new Opinion(opinionRequest, job));
 
         // TODO: referencja do firmy
         return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
@@ -428,11 +437,6 @@ public class JobController {
     }
 
     private boolean validateOpinionRequest(OpinionRequest opinionRequest, Job job){
-        if (!opinionRequest.getDate().equals(new Date(Calendar.getInstance().getTime().getTime())))
-            return false;
-
-        if(!opinionRequest.getJob().equals(job))
-            return false;
 
         //TODO: sprawdzenie czy rate jest w odpowiedznim przedziale itp
         //if(opinionRequest.getRate() between min_rate max_rate)

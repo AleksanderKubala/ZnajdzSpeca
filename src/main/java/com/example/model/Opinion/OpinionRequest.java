@@ -11,14 +11,10 @@ import java.util.Date;
 @Data
 public class OpinionRequest {
 
-    private Date date;
-    private Job job;
     private String text;
     private int rate;
 
     public OpinionRequest(Opinion opinion){
-        this.date = opinion.getDate();
-        this.job = opinion.getJob();
         this.text = opinion.getText();
         this.rate = opinion.getRate();
     }

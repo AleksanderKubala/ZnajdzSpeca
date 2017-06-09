@@ -5,6 +5,7 @@ import com.example.model.Job.Job;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -41,11 +42,11 @@ public class Opinion {
         this.text = text;
     }
 
-    public Opinion(OpinionRequest opinionRequest) {
-        this.date = opinionRequest.getDate();
-        this.job = opinionRequest.getJob();
+    public Opinion(OpinionRequest opinionRequest, Job job) {
+        this.date = Calendar.getInstance().getTime();
         this.text = opinionRequest.getText();
         this.rate = opinionRequest.getRate();
+        this.job = job;
     }
 
 
