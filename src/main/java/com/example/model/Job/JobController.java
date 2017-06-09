@@ -86,6 +86,9 @@ public class JobController {
         if(!convertDates(request))
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
+        if(!checkDates(request))
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+
         Job newJob = generateJobObject(request);
         jobRepository.save(newJob);
         List<Tag> tags = null;
@@ -506,21 +509,6 @@ public class JobController {
         return tags;
     }
 
-    private boolean validateDate(Job job) {
-        Date date = new Date(Calendar.getInstance().getTime().getTime());
-
-        if(job.getBeginDate() != null)
-            if(job.getBeginDate().before(date))
-                return false;
-
-        if(job.getEndDate() != null)
-            if(job.getEndDate().before(date))
-                return false;
-
-        return true;
-    }
-
-
     private Boolean checkIfCorrectRequest(JobRequest job) {
 
         if(job.getLocalization() == null) return false;
@@ -603,6 +591,19 @@ public class JobController {
             
             request.setEndDateC(date);
         }
+
+        return true;
+    }
+
+    private Boolean checkDates(JobRequest request) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        if(request.getBeginDateC().getTime() < calendar.getTime().getTime())
+            return false;
+
+        if(request.getEndDateC().getTime() < calendar.getTime().getTime())
+            return false;
 
         return true;
     }
