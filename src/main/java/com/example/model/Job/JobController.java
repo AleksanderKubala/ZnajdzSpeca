@@ -281,7 +281,6 @@ public class JobController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    //TODO: Po dodaniu tokenów zakodować sprawdzanie, czy Job należy do klienta określonego przez token
     @DeleteMapping(value = "/job/{id}")
     public ResponseEntity<JobResponse> deleteJob(@PathVariable Integer id) {
 
