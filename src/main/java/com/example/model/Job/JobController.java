@@ -365,6 +365,12 @@ public class JobController {
 
         if(sub == null)
             sub = new Submission(company, job, true);
+        else if(sub.getAccepted() != null) {
+            if(sub.getAccepted())
+                return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+            else
+                sub.setAccepted(true);
+        }
         else
             sub.setAccepted(true);
 

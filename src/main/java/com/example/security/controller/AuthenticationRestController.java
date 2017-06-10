@@ -63,7 +63,7 @@ public class AuthenticationRestController {
 
         MyLogger.log.info("SPRAWDZENIE POPRAWNOSCI WPROWADZONEGO HASLA");
         if(!user.getPassword().equals(jwtAuthenticationRequest.getPassword()))
-            return new ResponseEntity<JwtAuthenticationResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<JwtAuthenticationResponse>(HttpStatus.BAD_REQUEST);
 
         MyLogger.log.info("sprawdzenie tokena " + jwtTokenUtil.getEmailFromToken(token));
 
