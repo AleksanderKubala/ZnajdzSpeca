@@ -46,10 +46,9 @@ public class CompanyController {
                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
            }
 
-           Random random = new Random();
-           company.setRating(random.nextFloat()*5.0f);
-	       company.setNumberJobs(random.nextInt(25));
-	       company.setNumberOpinions(random.nextInt(25));
+           company.setRating(0.0f);
+	       company.setNumberJobs(0);
+	       company.setNumberOpinions(0);
            companyRepository.save(company);
         return new ResponseEntity<>(new CompanyResponse(company), HttpStatus.OK);
     }
@@ -65,6 +64,7 @@ public class CompanyController {
 
     @PutMapping("/company/{id}")
     public ResponseEntity<CompanyResponse> editCompanyById(@PathVariable Integer id, @RequestBody Company newCompany){
+
         if(!checkIfCorrectRequest(newCompany))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -78,16 +78,15 @@ public class CompanyController {
 
         Company companyCheck = companyRepository.findByEmail(newCompany.getEmail());
 
-        if(companyCheck == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if(companyCheck != null)
+            if(companyCheck.getId() != id)
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(companyCheck.getId() != id)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        company.copy(newCompany);
+        companyRepository.save(company);
+        CompanyResponse response = new CompanyResponse(company);
 
-        newCompany.setId(id);
-        companyRepository.save(newCompany);
-        return new ResponseEntity<>(new CompanyResponse(newCompany), HttpStatus.OK);
-
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/company/{id}/jobs")
@@ -186,9 +185,8 @@ public class CompanyController {
 
     private Boolean checkIfCorrectRequest(Company company) {
 
-        if(company.getEmail() == null)   return false;
+        //if(company.getEmail() == null)   return false;
         if(company.getName() == null)    return false;
-        if(company.getAreaRange() == null)    return false;
         if(company.getPassword() == null)    return false;
         if(company.getLocalization() == null)    return false;
 

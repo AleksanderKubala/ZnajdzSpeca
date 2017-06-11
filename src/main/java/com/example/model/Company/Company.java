@@ -60,6 +60,17 @@ public class Company {
         this.numberOpinions = numberOpinions;
     }
 
+    public void copy(Company company) {
+        //this.id = company.getId();
+        this.name = company.getName();
+        //this.email = company.getEmail();
+        this.password = company.getPassword();
+        this.localization = company.getLocalization();
+        this.areaRange = company.getAreaRange();
+        this.phoneNumber = company.getPhoneNumber();
+        this.description = company.getDescription();
+    }
+
     public int getId() {
         return id;
     }

@@ -44,6 +44,13 @@ public class Client {
         this.password = password;
     }
 
+    public void copy(Client client) {
+        this.name = client.getName();
+        this.lastname = client.getLastname();
+        this.password = client.getPassword();
+        this.phoneNumber = client.getPhoneNumber();
+    }
+
 
     public int getId() {
         return id;
