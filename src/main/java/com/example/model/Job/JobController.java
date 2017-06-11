@@ -460,6 +460,13 @@ public class JobController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         opinionRepository.save(new Opinion(opinionRequest, job));
+        Company company = job.getCompany();
+        Integer numberOps = company.getNumberOpinions();
+        Float compRate = company.getRating();
+        compRate = compRate*numberOps + (float)opinionRequest.getRate();
+        compRate = compRate/(float)(numberOps+1);
+        company.setNumberOpinions(numberOps+1);
+        company.setRating(compRate);
 
         // TODO: referencja do firmy
         return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
@@ -485,7 +492,9 @@ public class JobController {
         if(job.getCompany() != null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        job.setCompany(companyRepository.findOne(companyId));
+        Company company = companyRepository.findOne(companyId);
+        company.setNumberJobs(company.getNumberJobs()+1);
+        job.setCompany(company);
         job.setVisible(false);
 
         jobRepository.save(job);
