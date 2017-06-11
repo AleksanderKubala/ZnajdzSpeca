@@ -9,6 +9,7 @@ import com.example.model.Tag.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -61,15 +62,18 @@ public class ClientController {
         if(client == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        Client checkedClient = clientRepository.findByEmail(updatedClient.getEmail());
+        if(!SecurityContextHolder.getContext().getAuthentication().getName().equals(client.getEmail()))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        if(checkedClient != null)
-            if(checkedClient.getId() != id)
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        //Client checkedClient = clientRepository.findByEmail(updatedClient.getEmail());
 
-        updatedClient.setId(id);
-        clientRepository.save(updatedClient);
-        ClientResponse response = new ClientResponse(updatedClient);
+        //if(checkedClient != null)
+         //   if(checkedClient.getId() != id)
+          //      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        client.copy(updatedClient);
+        clientRepository.save(client);
+        ClientResponse response = new ClientResponse(client);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -107,7 +111,7 @@ public class ClientController {
 
     private Boolean checkIfCorrectRequest(Client client) {
 
-        if(client.getEmail() == null)   return false;
+        //if(client.getEmail() == null)   return false;
         if(client.getName() == null)    return false;
         if(client.getLastname() == null)    return false;
         if(client.getPassword() == null)    return false;
