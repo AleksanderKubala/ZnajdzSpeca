@@ -76,8 +76,6 @@ public class JobController {
         if(client == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        request.setClientId(client.getId());
-
         Boolean correct = checkIfCorrectRequest(request);
 
         if(!correct)
@@ -89,7 +87,7 @@ public class JobController {
         if(!checkDates(request))
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 
-        Job newJob = generateJobObject(request);
+        Job newJob = generateJobObject(request, client);
         jobRepository.save(newJob);
         List<Tag> tags = null;
 
@@ -101,6 +99,7 @@ public class JobController {
             }
         }
 
+        /*
         if((request.getImages() != null))
             if(!request.getImages().isEmpty()) {
                 uploadFiles(request.getImages(), newJob);
@@ -112,8 +111,9 @@ public class JobController {
         for(Photo photo : gallery) {
             photos.add(new PhotoResponse(photo));
         }
+        */
 
-        JobResponse response = new JobResponse(newJob, tags, photos);
+        JobResponse response = new JobResponse(newJob, tags, null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -142,7 +142,7 @@ public class JobController {
         if(!convertDates(request))
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Job newJob = generateJobObject(request);
+        Job newJob = generateJobObject(request, client);
         newJob.setVisible(false);
         jobRepository.save(newJob);
         List<Tag> tags = null;
@@ -537,14 +537,13 @@ public class JobController {
         return true;
     }
 
-    private Job generateJobObject(JobRequest request) {
+    private Job generateJobObject(JobRequest request, Client client) {
 
         Job newJob = new Job(request);
         Date date = new Date(Calendar.getInstance().getTime().getTime());
         newJob.setAddedAt(date);
         newJob.setVisible(true);
-        //TODO: Powiązać klienta po tokenie, wiązać job z klientem z tokena
-        newJob.setClient(clientRepository.findById(request.getClientId()));
+        newJob.setClient(client);
 
         return newJob;
     }
@@ -571,61 +570,76 @@ public class JobController {
 
     private Boolean convertDates(JobRequest request) {
 
+        Date beginDate;
+        Date endDate;
+
         if(request.getBeginDate() != null) {
-            
-            Date date;
+
             if (!request.getBeginDate().equals("null")) {
 
                 try {
-                    date = new Date(dateFormat.parse(request.getBeginDate()).getTime());
+                    beginDate = new Date(dateFormat.parse(request.getBeginDate()).getTime());
                 } catch (ParseException e) {
                     e.printStackTrace();
                     return false;
                 }
             }
             else {
-                date = new Date(Calendar.getInstance().getTime().getTime());
-            } 
-            
-            request.setBeginDateC(date);
+                beginDate = new Date(Calendar.getInstance().getTime().getTime());
+            }
+        }
+        else {
+            beginDate = new Date(Calendar.getInstance().getTime().getTime());
         }
 
         if(request.getEndDate() != null) {
             
-            Date date;
+
             if (!request.getEndDate().equals("null")) {
 
                 try {
-                    date = new Date(dateFormat.parse(request.getEndDate()).getTime());
+                    endDate = new Date(dateFormat.parse(request.getEndDate()).getTime());
                 } catch (ParseException e) {
                     e.printStackTrace();
                     return false;
                 }
             }
             else {
-                
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 14);
-                date = new Date(calendar.getTime().getTime());
+                endDate = new Date(calendar.getTime().getTime());
             }
-            
-            request.setEndDateC(date);
+        }
+        else {
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 14);
+            endDate = new Date(calendar.getTime().getTime());
         }
 
+        request.setBeginDateC(beginDate);
+        request.setEndDateC(endDate);
         return true;
     }
 
     private Boolean checkDates(JobRequest request) {
 
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
 
-        if(request.getBeginDateC().getTime() < calendar.getTime().getTime())
+        Date today = new Date(calendar.getTime().getTime());
+
+        if(request.getBeginDateC().compareTo(today) < 0)
             return false;
 
-        if(request.getEndDateC().getTime() < calendar.getTime().getTime())
+        if(request.getEndDateC().compareTo(today) < 0)
             return false;
 
-        if(request.getEndDateC().getTime() < request.getBeginDateC().getTime())
+        if(request.getEndDateC().compareTo(request.getBeginDateC()) < 0)
             return false;
 
         return true;
