@@ -309,6 +309,9 @@ public class JobController {
         List<Photo> photos = photoRepository.findAllByJob(job);
         photoRepository.delete(photos);
 
+        List<Submission> subs = submissionRepository.findAllByJob(job);
+        submissionRepository.delete(subs);
+
         jobRepository.delete(id);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -467,6 +470,7 @@ public class JobController {
         compRate = compRate/(float)(numberOps+1);
         company.setNumberOpinions(numberOps+1);
         company.setRating(compRate);
+        companyRepository.save(company);
 
         // TODO: referencja do firmy
         return new ResponseEntity<>(new JobResponse(job,returnTagListBySpecializations(job))
@@ -496,6 +500,7 @@ public class JobController {
         company.setNumberJobs(company.getNumberJobs()+1);
         job.setCompany(company);
         job.setVisible(false);
+        companyRepository.save(company);
 
         jobRepository.save(job);
 
